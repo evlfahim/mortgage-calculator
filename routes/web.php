@@ -13,12 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 
 use App\Http\Controllers\MortgageCalculatorController;
 
-Route::get('/calculator', [MortgageCalculatorController::class, 'showCalculator']);
-// Add more routes as needed
+
+
+Route::get('/', [MortgageCalculatorController::class, 'showCalculator']);
+// web.php
+//Route::get('/', 'MortgageCalculatorController@showCalculator');
+
+
