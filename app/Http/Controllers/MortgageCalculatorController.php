@@ -3,31 +3,106 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MortgageCalculatorController extends Controller
 {
-    //
     public function showCalculator(Request $request)
     {
         $request->validate([
             'loan_amount' => 'required|numeric|min:1',
             'interest_rate' => 'required|numeric|min:0',
             'loan_term' => 'required|integer|min:1',
-            // Add more validation rules as needed
+            'monthly_extra_payment' => 'nullable|numeric|min:0',
+        ], [
+            'loan_amount.required' => 'Loan amount is required.',
+            'interest_rate.required' => 'Annual interest rate is required.',
+            'loan_term.required' => 'Loan term is required.',
+            // Add more custom error messages as needed
         ]);
 
+        // Retrieve validated data
         $loanAmount = $request->input('loan_amount');
         $interestRate = $request->input('interest_rate') / 100; // Convert percentage to decimal
         $loanTerm = $request->input('loan_term');
+        $monthlyExtraPayment = $request->input('monthly_extra_payment', 0);
 
-        $monthlyInterestRate = ($interestRate / 12);
+        // Calculate monthly payment
+        $monthlyInterestRate = $interestRate / 12;
         $numberOfMonths = $loanTerm * 12;
 
-        // Monthly payment formula
         $monthlyPayment = ($loanAmount * $monthlyInterestRate) / (1 - pow(1 + $monthlyInterestRate, -$numberOfMonths));
 
-        // Your controller logic goes here, you can pass $monthlyPayment to the view
+        // Generate amortization schedule
+        $amortizationSchedule = [];
+        $extraRepaymentSchedule = [];
 
-        return view('calculator', ['monthlyPayment' => $monthlyPayment]);
+        $remainingBalance = $loanAmount;
+        $monthlyInterest = 0;
+        $monthlyPrincipal = 0;
+
+        for ($month = 1; $month <= $numberOfMonths; $month++) {
+            $monthlyInterest = $remainingBalance * $monthlyInterestRate;
+            $monthlyPrincipal = $monthlyPayment - $monthlyInterest;
+
+            // Deduct extra repayment from the remaining balance
+            $remainingBalance -= $monthlyExtraPayment;
+
+            // Store schedule data in the "loan_amortization_schedule" table
+            DB::table('loan_amortization_schedule')->insert([
+                'month_number' => $month,
+                'starting_balance' => $remainingBalance + $monthlyPrincipal,
+                'monthly_payment' => $monthlyPayment,
+                'principal_component' => $monthlyPrincipal,
+                'interest_component' => $monthlyInterest,
+                'ending_balance' => $remainingBalance,
+            ]);
+
+            // Store schedule data in the array for further use
+            $amortizationSchedule[] = [
+                'month_number' => $month,
+                'starting_balance' => $remainingBalance + $monthlyPrincipal,
+                'monthly_payment' => $monthlyPayment,
+                'principal_component' => $monthlyPrincipal,
+                'interest_component' => $monthlyInterest,
+                'ending_balance' => $remainingBalance,
+            ];
+
+            // Store data for "extra_repayment_schedule" table
+            DB::table('extra_repayment_schedule')->insert([
+                'month_number' => $month,
+                'starting_balance' => $remainingBalance + $monthlyPrincipal,
+                'monthly_payment' => $monthlyPayment,
+                'principal_component' => $monthlyPrincipal,
+                'interest_component' => $monthlyInterest,
+                'extra_repayment_made' => $monthlyExtraPayment,
+                'ending_balance_after_extra_repayment' => $remainingBalance,
+                'remaining_loan_term_after_extra_repayment' => $numberOfMonths - $month,
+            ]);
+
+            // Store data in the array for further use
+            $extraRepaymentSchedule[] = [
+                'month_number' => $month,
+                'starting_balance' => $remainingBalance + $monthlyPrincipal,
+                'monthly_payment' => $monthlyPayment,
+                'principal_component' => $monthlyPrincipal,
+                'interest_component' => $monthlyInterest,
+                'extra_repayment_made' => $monthlyExtraPayment,
+                'ending_balance_after_extra_repayment' => $remainingBalance,
+                'remaining_loan_term_after_extra_repayment' => $numberOfMonths - $month,
+            ];
+
+            $remainingBalance -= $monthlyPrincipal;
+        }
+
+        // Your controller logic goes here, you can pass $monthlyPayment and schedules to the view
+
+        return view('calculator', [
+            'monthlyPayment' => $monthlyPayment,
+            'amortizationSchedule' => $amortizationSchedule,
+            'extraRepaymentSchedule' => $extraRepaymentSchedule,
+            'loanDetails' => $loanDetails, // Include loan details for the header
+
+        ]);
     }
 }
