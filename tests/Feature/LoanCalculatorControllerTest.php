@@ -29,7 +29,7 @@ class LoanCalculatorControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                // Add assertions based on your expected response
+            
             ]);
     }
 }

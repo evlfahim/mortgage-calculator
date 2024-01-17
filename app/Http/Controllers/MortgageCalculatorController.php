@@ -18,7 +18,6 @@ class MortgageCalculatorController extends Controller
             'loan_amount.required' => 'Loan amount is required.',
             'interest_rate.required' => 'Annual interest rate is required.',
             'loan_term.required' => 'Loan term is required.',
-            // Add more custom error messages as needed
         ]);
 
         // Retrieve validated data
@@ -95,13 +94,11 @@ class MortgageCalculatorController extends Controller
             $remainingBalance -= $monthlyPrincipal;
         }
 
-        // Your controller logic goes here, you can pass $monthlyPayment and schedules to the view
-
         return view('calculator', [
             'monthlyPayment' => $monthlyPayment,
             'amortizationSchedule' => $amortizationSchedule,
             'extraRepaymentSchedule' => $extraRepaymentSchedule,
-            'loanDetails' => $loanDetails, // Include loan details for the header
+            'loanDetails' => $loanDetails, 
 
         ]);
     }

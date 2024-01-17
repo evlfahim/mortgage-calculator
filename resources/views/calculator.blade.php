@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <!-- Your calculator form and result display here -->
+    <!-- calculator form and result display here -->
 
     @isset($loanDetails)
         <div>
@@ -36,7 +36,7 @@
     <!-- Display the amortization schedule table -->
     @isset($amortizationSchedule)
         <h2>Amortization Schedule</h2>
-        <!-- Your table code for amortization schedule here -->
+        <!-- table code for amortization schedule here -->
         <table>
             <thead>
                 <!-- Table header row -->
@@ -68,7 +68,7 @@
     <!-- Display the extra repayment schedule table -->
     @isset($extraRepaymentSchedule)
         <h2>Extra Repayment Schedule</h2>
-        <!-- Your table code for extra repayment schedule here -->
+        <!-- table code for extra repayment schedule here -->
         <table>
             <thead>
                 <!-- Table header row -->
