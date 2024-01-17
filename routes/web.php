@@ -17,14 +17,10 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\MortgageCalculatorController;
 
-// web.php
-Route::middleware(['web'])->group(function () {
-    Route::get('/calculator', 'MortgageCalculatorController@showCalculator');
-});
 
 
-//Route::get('/', [MortgageCalculatorController::class, 'showCalculator']);
+Route::get('/', [MortgageCalculatorController::class, 'showCalculator']);
 // web.php
-Route::get('/', 'MortgageCalculatorController@showCalculator');
+//Route::get('/', 'MortgageCalculatorController@showCalculator');
 
 

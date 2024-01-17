@@ -94,12 +94,18 @@ class MortgageCalculatorController extends Controller
             $remainingBalance -= $monthlyPrincipal;
         }
 
+        $loanDetails = [
+            'loan_amount' => $loanAmount,
+            'annual_interest_rate' => $interestRate * 100, // Convert back to percentage
+            'loan_term' => $loanTerm,
+            'effective_interest_rate' => ($monthlyPayment * $numberOfMonths - $loanAmount) / $loanAmount * 100,
+        ];
+
         return view('calculator', [
             'monthlyPayment' => $monthlyPayment,
             'amortizationSchedule' => $amortizationSchedule,
             'extraRepaymentSchedule' => $extraRepaymentSchedule,
-            'loanDetails' => $loanDetails, 
-
+            'loanDetails' => $loanDetails,
         ]);
     }
 }
